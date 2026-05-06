@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>multiplybyzero0115212</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS Custom Properties
+   莫兰迪色系 × 四种情绪主题
+   ============================================ */
+
+:root {
+  --font-primary: "Noto Serif SC", "Songti SC", "SimSun", "宋体", serif;
+  --transition: 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---------- 开心 — 暖调 dusty rose ---------- */
+body.mood-happy {
+  --bg: #f5f0ed;
+  --bg-alt: #faf6f3;
+  --accent: #c4a0a0;
+  --accent-dim: rgba(196, 160, 160, 0.15);
+  --accent-strong: #a07878;
+  --text: #3d2c2a;
+  --text-dim: #8c7b7a;
+  --border: #e0d5d0;
+  --overlay-bg: #f5f0ed;
+}
+
+/* ---------- 伤心 — 冷调 muted steel blue ---------- */
+body.mood-sad {
+  --bg: #f0f2f4;
+  --bg-alt: #f5f6f8;
+  --accent: #8a9bae;
+  --accent-dim: rgba(138, 155, 174, 0.15);
+  --accent-strong: #6b7d92;
+  --text: #2a3038;
+  --text-dim: #7a8490;
+  --border: #d5dbe3;
+  --overlay-bg: #f0f2f4;
+}
+
+/* ---------- 平静 — 自然 sage green ---------- */
+body.mood-calm {
+  --bg: #f2f4f0;
+  --bg-alt: #f8faf6;
+  --accent: #a3b5a6;
+  --accent-dim: rgba(163, 181, 166, 0.15);
+  --accent-strong: #829985;
+  --text: #2d332a;
+  --text-dim: #7a8576;
+  --border: #d5ddd0;
+  --overlay-bg: #f2f4f0;
+}
+
+/* ---------- 焦虑 — 柔紫 muted lavender ---------- */
+body.mood-anxious {
+  --bg: #f4f1f5;
+  --bg-alt: #f9f7fa;
+  --accent: #b8a9c9;
+  --accent-dim: rgba(184, 169, 201, 0.15);
+  --accent-strong: #9a8aac;
+  --text: #332e3a;
+  --text-dim: #8a8295;
+  --border: #ddd5e3;
+  --overlay-bg: #f4f1f5;
+}
+
+/* ============================================
+   Reset & Base
+   ============================================ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  transition: background-color var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   Mood Overlay
+   ============================================ */
+
+.mood-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-bg, #f5f0ed);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+.mood-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mood-overlay .site-name-prelude {
+  font-size: 1rem;
+  letter-spacing: 0.35em;
+  color: var(--text-dim);
+  margin-bottom: 2.5rem;
+}
+
+.mood-overlay .question {
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin-bottom: 3rem;
+}
+
+.mood-choices {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mood-btn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 1.2rem 2rem;
+  font-family: var(--font-primary);
+  font-size: 1.1rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  letter-spacing: 0.05em;
+  position: relative;
+  outline: none;
+}
+
+.mood-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 1px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.mood-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.mood-btn:hover::after { width: 100%; }
+
+.mood-btn .emoji {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   Main Page
+   ============================================ */
+
+.main-page {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+}
+
+.main-page.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   Header
+   ============================================ */
+
+.site-header {
+  padding: 3rem 2rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+  transition: border-color var(--transition);
+}
+
+.site-header .site-title {
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+}
+
+.site-header .mood-indicator {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.site-header .reset-mood {
+  background: none;
+  border: none;
+  font-family: var(--font-primary);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  margin-top: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border);
+  transition: color 0.3s, text-decoration-color 0.3s;
+}
+
+.site-header .reset-mood:hover {
+  color: var(--accent-strong);
+  text-decoration-color: var(--accent);
+}
+
+/* ============================================
+   Module Grid
+   ============================================ */
+
+.module-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2rem;
+}
+
+/* ============================================
+   Module Card
+   ============================================ */
+
+.module-card {
+  position: relative;
+  border: 1px solid var(--border);
+  padding: 2.5rem 2rem;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  background: var(--bg-alt);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 280px;
+}
+
+.module-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-dim) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.module-card:hover::before { opacity: 1; }
+
+.module-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px -30px rgba(0,0,0,0.08);
+}
+
+.module-card .card-number {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.module-card .card-title {
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+}
+
+.module-card .card-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+
+.module-card .card-decoration {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.5s ease;
+}
+
+.module-card:hover .card-decoration {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Magazine mosaic grid placement */
+.module-card:nth-child(1) { grid-column: span 5; }
+.module-card:nth-child(2) { grid-column: span 7; }
+.module-card:nth-child(3) { grid-column: span 7; }
+.module-card:nth-child(4) { grid-column: span 5; }
+.module-card:nth-child(5) { grid-column: span 4; }
+.module-card:nth-child(6) { grid-column: span 4; }
+.module-card:nth-child(7) { grid-column: span 4; }
+
+/* ============================================
+   Detail Overlay
+   ============================================ */
+
+.module-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 900;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.module-detail-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.module-detail-content {
+  max-width: 700px;
+  margin: 4rem auto;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease 0.2s;
+}
+
+.module-detail-overlay.active .module-detail-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.module-detail-content h2 {
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  margin-bottom: 1rem;
+}
+
+.module-detail-content .detail-meta {
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  margin-bottom: 2rem;
+}
+
+.module-detail-content .detail-body {
+  font-size: 1.05rem;
+  line-height: 2;
+}
+
+.module-detail-content .detail-body p { margin-bottom: 1.2rem; }
+
+.module-detail-content .placeholder-block {
+  height: 200px;
+  background: var(--accent-dim);
+  margin: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+.close-detail {
+  position: fixed;
+  top: 2rem; right: 2rem;
+  z-index: 901;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 48px; height: 48px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.close-detail.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.close-detail:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+
+.site-footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+  .module-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 1.25rem 3rem;
+  }
+  .module-card:nth-child(n) { grid-column: span 1; }
+  .module-card { min-height: 200px; padding: 2rem 1.5rem; }
+  .module-card .card-title { font-size: 1.6rem; }
+  .mood-choices { gap: 1rem; }
+  .mood-btn { padding: 1rem 1.5rem; font-size: 1rem; }
+  .mood-overlay .question { font-size: 1.4rem; text-align: center; padding: 0 1rem; }
+  .site-header .site-title { font-size: 1.3rem; }
+  .site-header { padding: 2rem 1rem 1rem; margin-bottom: 2rem; }
+  .module-detail-content { margin: 2rem auto; padding: 0 0.5rem; }
+  .module-detail-content h2 { font-size: 1.8rem; }
+  .close-detail { top: 1rem; right: 1rem; width: 40px; height: 40px; }
+}
+
+@media (max-width: 480px) {
+  .mood-choices { flex-direction: column; width: 80%; }
+  .mood-btn { width: 100%; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     Mood Entry Overlay
+     ============================================ -->
+<div class="mood-overlay" id="moodOverlay">
+  <div class="site-name-prelude">multiplybyzero0115212</div>
+  <div class="question">今天，你的心情如何？</div>
+  <div class="mood-choices">
+    <button class="mood-btn" data-mood="happy">
+      <span class="emoji">&#9728;</span>开心
+    </button>
+    <button class="mood-btn" data-mood="sad">
+      <span class="emoji">&#9730;</span>伤心
+    </button>
+    <button class="mood-btn" data-mood="calm">
+      <span class="emoji">&#9782;</span>平静
+    </button>
+    <button class="mood-btn" data-mood="anxious">
+      <span class="emoji">&#9789;</span>焦虑
+    </button>
+  </div>
+</div>
+
+<!-- ============================================
+     Main Page
+     ============================================ -->
+<div class="main-page" id="mainPage">
+  <header class="site-header">
+    <div class="site-title">multiplybyzero0115212</div>
+    <div class="mood-indicator" id="moodIndicator"></div>
+    <button class="reset-mood" id="resetMood">更换心情</button>
+  </header>
+
+  <div class="module-grid" id="moduleGrid">
+
+    <div class="module-card" data-module="books">
+      <div>
+        <div class="card-number">壹</div>
+        <div class="card-title">书籍</div>
+        <div class="card-subtitle">阅读是一座随身携带的避难所。<br>在这里，收藏那些塑造过我的文字与思想。</div>
+      </div>
+      <div class="card-decoration">翻阅 →</div>
+    </div>
+
+    <div class="module-card" data-module="aesthetics">
+      <div>
+        <div class="card-number">贰</div>
+        <div class="card-title">审美</div>
+        <div class="card-subtitle">美是一种直觉，也是一种选择。<br>收集打动我的画面、色彩与形态。</div>
+      </div>
+      <div class="card-decoration">欣赏 →</div>
+    </div>
+
+    <div class="module-card" data-module="movies">
+      <div>
+        <div class="card-number">叁</div>
+        <div class="card-title">电影</div>
+        <div class="card-subtitle">每一帧都是时间的切片。<br>记录那些让我停下来凝视的影像。</div>
+      </div>
+      <div class="card-decoration">放映 →</div>
+    </div>
+
+    <div class="module-card" data-module="brands">
+      <div>
+        <div class="card-number">肆</div>
+        <div class="card-title">品牌</div>
+        <div class="card-subtitle">好的品牌有灵魂。<br>关注那些有态度、有故事的名字。</div>
+      </div>
+      <div class="card-decoration">探索 →</div>
+    </div>
+
+    <div class="module-card" data-module="outfits">
+      <div>
+        <div class="card-number">伍</div>
+        <div class="card-title">穿搭</div>
+        <div class="card-subtitle">穿衣是每日的自我表达。<br>风格比时尚更持久。</div>
+      </div>
+      <div class="card-decoration">试衣 →</div>
+    </div>
+
+    <div class="module-card" data-module="travel">
+      <div>
+        <div class="card-number">陆</div>
+        <div class="card-title">旅行</div>
+        <div class="card-subtitle">世界是一本打开的书。<br>那些走过的路，遇见的人。</div>
+      </div>
+      <div class="card-decoration">出发 →</div>
+    </div>
+
+    <div class="module-card" data-module="games">
+      <div>
+        <div class="card-number">柒</div>
+        <div class="card-title">游戏</div>
+        <div class="card-subtitle">第九艺术的世界。<br>在虚拟中寻找真实的触动。</div>
+      </div>
+      <div class="card-decoration">开始 →</div>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2026 multiplybyzero0115212 &mdash; built with vibecoding
+  </footer>
+</div>
+
+<!-- ============================================
+     Detail Overlay
+     ============================================ -->
+<div class="module-detail-overlay" id="detailOverlay">
+  <div class="module-detail-content" id="detailContent"></div>
+</div>
+<button class="close-detail" id="closeDetail">&#10005;</button>
+
+<!-- ============================================
+     JavaScript
+     ============================================ -->
+<script>
+(function() {
+  var moodOverlay = document.getElementById('moodOverlay');
+  var mainPage = document.getElementById('mainPage');
+  var moodIndicator = document.getElementById('moodIndicator');
+  var resetMood = document.getElementById('resetMood');
+  var moduleGrid = document.getElementById('moduleGrid');
+  var detailOverlay = document.getElementById('detailOverlay');
+  var detailContent = document.getElementById('detailContent');
+  var closeDetail = document.getElementById('closeDetail');
+
+  var moodLabels = {
+    happy: '今日心情：开心 — 暖调',
+    sad: '今日心情：伤心 — 冷调',
+    calm: '今日心情：平静 — 自然',
+    anxious: '今日心情：焦虑 — 柔紫'
+  };
+
+  var moduleDetails = {
+    books: {
+      title: '书籍',
+      meta: '壹 · Books · 阅读笔记',
+      body: '<p>这里将收录我读过的书、正在读的书，以及那些反复重读的段落。</p><div class="placeholder-block">📖 书单与笔记将在这里呈现</div><p>你可以在这里添加读书笔记、书摘、推荐书单，或者按主题整理你的阅读地图。每一本书都是一个世界，而这里是你私人图书馆的入口。</p>'
+    },
+    aesthetics: {
+      title: '审美',
+      meta: '贰 · Aesthetics · 视觉收藏',
+      body: '<p>审美是一种直觉，也是一种可以被训练的能力。这里收集一切让我心动的视觉元素。</p><div class="placeholder-block">🎨 灵感画板将在这里呈现</div><p>从一张照片的构图到一栋建筑的线条，从一件瓷器的釉色到一片树叶的纹理——审美库里没有高低之分，只有是否打动你。</p>'
+    },
+    movies: {
+      title: '电影',
+      meta: '叁 · Movies · 影像日志',
+      body: '<p>电影是时间的艺术。有些电影看一遍就够，有些值得反复回看。</p><div class="placeholder-block">🎬 影单与评论将在这里呈现</div><p>这里会记录我看过的电影、想看的电影，以及那些在黑暗的放映厅里击中我的瞬间。也许还有导演专题、年度十佳之类的整理。</p>'
+    },
+    brands: {
+      title: '品牌',
+      meta: '肆 · Brands · 品牌档案',
+      body: '<p>好的品牌有自己的世界观。它们不只是卖东西，而是在讲述一种生活方式。</p><div class="placeholder-block">🏷️ 品牌收藏将在这里呈现</div><p>从奢侈时装到独立设计师，从百年老铺到新锐工作室——我关注那些有叙事、有坚持、有美感的品牌。每个品牌都是一个故事。</p>'
+    },
+    outfits: {
+      title: '穿搭',
+      meta: '伍 · Outfits · 风格记录',
+      body: '<p>穿衣是每天都要做的决定，为什么不把它变成一件有趣的事？</p><div class="placeholder-block">👔 穿搭记录将在这里呈现</div><p>风格不是买来的，是穿出来的。这里记录我的日常搭配灵感、单品推荐、季节衣橱整理，以及那些让我觉得「今天穿对了」的时刻。</p>'
+    },
+    travel: {
+      title: '旅行',
+      meta: '陆 · Travel · 旅途记忆',
+      body: '<p>我们旅行不是为了逃离生活，而是为了让生活不逃离我们。</p><div class="placeholder-block">✈️ 旅行日志将在这里呈现</div><p>去过的地方、计划中的目的地、路上的照片和随笔——旅行是空间上的阅读，每一段路程都在悄悄改变我们看世界的方式。</p>'
+    },
+    games: {
+      title: '游戏',
+      meta: '柒 · Games · 游玩记录',
+      body: '<p>游戏是第九艺术，它让观看者成为参与者。</p><div class="placeholder-block">🎮 游戏库将在这里呈现</div><p>从独立小品到3A大作，从叙事解谜到开放世界——这里记录我玩过的游戏、感动的瞬间、以及那些让我想了很久的关卡设计。</p>'
+    }
+  };
+
+  // Mood selection
+  var moodBtns = document.querySelectorAll('.mood-btn');
+  for (var i = 0; i < moodBtns.length; i++) {
+    moodBtns[i].addEventListener('click', function() {
+      setMood(this.dataset.mood);
+    });
+  }
+
+  function setMood(mood) {
+    document.body.classList.remove('mood-happy', 'mood-sad', 'mood-calm', 'mood-anxious');
+    document.body.classList.add('mood-' + mood);
+    try { localStorage.setItem('multiplybyzero_mood', mood); } catch(e) {}
+    moodOverlay.classList.add('hidden');
+    mainPage.classList.add('visible');
+    moodIndicator.textContent = moodLabels[mood] || '';
+  }
+
+  // Reset mood
+  resetMood.addEventListener('click', function() {
+    moodOverlay.classList.remove('hidden');
+    mainPage.classList.remove('visible');
+    document.body.classList.remove('mood-happy', 'mood-sad', 'mood-calm', 'mood-anxious');
+    try { localStorage.removeItem('multiplybyzero_mood'); } catch(e) {}
+  });
+
+  // Module click → detail
+  moduleGrid.addEventListener('click', function(e) {
+    var card = e.target.closest('.module-card');
+    if (!card) return;
+    var mod = card.dataset.module;
+    if (!mod || !moduleDetails[mod]) return;
+    showDetail(mod);
+  });
+
+  function showDetail(mod) {
+    var d = moduleDetails[mod];
+    detailContent.innerHTML = '<h2>' + d.title + '</h2><div class="detail-meta">' + d.meta + '</div><div class="detail-body">' + d.body + '</div>';
+    detailOverlay.classList.add('active');
+    closeDetail.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideDetail() {
+    detailOverlay.classList.remove('active');
+    closeDetail.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  closeDetail.addEventListener('click', hideDetail);
+  detailOverlay.addEventListener('click', function(e) {
+    if (e.target === detailOverlay) hideDetail();
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && detailOverlay.classList.contains('active')) {
+      hideDetail();
+    }
+  });
+
+  // Restore saved mood
+  var savedMood;
+  try { savedMood = localStorage.getItem('multiplybyzero_mood'); } catch(e) {}
+  if (savedMood) {
+    setMood(savedMood);
+  }
+})();
+</script>
+
+</body>
+</html>
